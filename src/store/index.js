@@ -34,22 +34,22 @@ export default new Vuex.Store({
         item.amount = amount;
       }
     },
-    addCartProductAmount(state, productId) {
+    addCartProductAmount(state, { productId, amount }) {
       // eslint-disable-next-line no-shadow
       const item = state.cartProducts.find((item) => item.productId === productId);
 
       if (item) {
         // eslint-disable-next-line no-plusplus
-        item.amount++;
+        item.amount = amount + 1;
       }
     },
-    reduceCartProductAmount(state, productId) {
+    reduceCartProductAmount(state, { productId, amount }) {
       // eslint-disable-next-line no-shadow
       const item = state.cartProducts.find((item) => item.productId === productId);
 
       if (item && item.amount > 0) {
         // eslint-disable-next-line no-plusplus
-        item.amount--;
+        item.amount = amount - 1;
       }
     },
     updateUserAccessKey(state, accessKey) {
@@ -126,6 +126,40 @@ export default new Vuex.Store({
     },
     updateCartProductAmount(context, { productId, amount }) {
       context.commit('updateCartProductAmount', { productId, amount });
+      return axios.put(`${API_BASE_URL}/api/baskets/products`, {
+        productId,
+        quantity: amount,
+      }, {
+        params: {
+          userAccessKey: context.state.userAccessKey,
+        },
+      })
+        .then((response) => {
+          context.commit('updateCartProductsData', response.data.items);
+        })
+        .catch(() => {
+          context.commit('syncCartProducts');
+        });
+    },
+    addCartProductAmount(context, { productId, amount }) {
+      context.commit('addCartProductAmount', { productId, amount });
+      return axios.put(`${API_BASE_URL}/api/baskets/products`, {
+        productId,
+        quantity: amount,
+      }, {
+        params: {
+          userAccessKey: context.state.userAccessKey,
+        },
+      })
+        .then((response) => {
+          context.commit('updateCartProductsData', response.data.items);
+        })
+        .catch(() => {
+          context.commit('syncCartProducts');
+        });
+    },
+    reduceCartProductAmount(context, { productId, amount }) {
+      context.commit('reduceCartProductAmount', { productId, amount });
       return axios.put(`${API_BASE_URL}/api/baskets/products`, {
         productId,
         quantity: amount,

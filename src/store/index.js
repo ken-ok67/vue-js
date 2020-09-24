@@ -10,32 +10,28 @@ export default new Vuex.Store({
     cartProducts: [],
     userAccessKey: null,
     cartProductsData: [],
+    orderInfo: null,
   },
   mutations: {
+    updateDelivery(state, delivery) {
+      state.orderInfo.delivery = delivery;
+    },
+    updatePay(state, pay) {
+      state.orderInfo.pay = pay;
+    },
+    updateOrderInfo(state, orderInfo) {
+      state.orderInfo = orderInfo;
+    },
+    resetCart(state) {
+      state.cartProducts = [];
+      state.cartProductsData = [];
+    },
     updateCartProductAmount(state, { productId, amount }) {
       // eslint-disable-next-line no-shadow
       const item = state.cartProducts.find((item) => item.productId === productId);
 
       if (item) {
         item.amount = amount;
-      }
-    },
-    addCartProductAmount(state, productId) {
-      // eslint-disable-next-line no-shadow
-      const item = state.cartProducts.find((item) => item.productId === productId);
-
-      if (item) {
-        // eslint-disable-next-line no-plusplus
-        item.amount++;
-      }
-    },
-    reduceCartProductAmount(state, productId) {
-      // eslint-disable-next-line no-shadow
-      const item = state.cartProducts.find((item) => item.productId === productId);
-
-      if (item && item.amount > 0) {
-        // eslint-disable-next-line no-plusplus
-        item.amount--;
       }
     },
     updateUserAccessKey(state, accessKey) {
@@ -71,6 +67,16 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    loadOrderInfo(context, orderId) {
+      return axios.get(`${API_BASE_URL}/api/orders/${orderId}`, {
+        params: {
+          userAccessKey: context.state.userAccessKey,
+        },
+      })
+        .then((response) => {
+          context.commit('updateOrderInfo', response.data);
+        });
+    },
     loadCart(context) {
       return axios.get(`${API_BASE_URL}/api/baskets`, {
         params: {
@@ -118,13 +124,16 @@ export default new Vuex.Store({
         });
     },
     deleteProductFromCart(context, productId) {
-      const headers = {
-        userAccessKey: context.state.userAccessKey,
-      };
-      const data = {
-        productId,
-      };
-      return axios.delete(`${API_BASE_URL}/api/baskets/products`, { headers, data })
+      return axios.request({
+        url: 'http://vue-study.dev.creonit.ru/api/baskets/products',
+        method: 'delete',
+        params: {
+          userAccessKey: this.state.userAccessKey,
+        },
+        data: {
+          productId,
+        },
+      })
         .then((response) => {
           context.commit('updateCartProductsData', response.data.items);
           context.commit('syncCartProducts');

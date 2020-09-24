@@ -12,7 +12,7 @@
 
     <div class="product__counter form__counter">
       <button type="button" aria-label="Убрать один товар"
-              @click.prevent="reduceAmount(item.productId, item.amount)">
+              @click.prevent="reduceAmount(item.productId)">
         <svg width="10" height="10" fill="currentColor">
           <use xlink:href="#icon-minus"></use>
         </svg>
@@ -21,7 +21,7 @@
       <input type="text" v-model.number="amount" name="count">
 
       <button type="button" aria-label="Добавить один товар"
-              @click.prevent="addAmount(item.productId, item.amount)">
+              @click.prevent="addAmount(item.productId)">
         <svg width="10" height="10" fill="currentColor">
           <use xlink:href="#icon-plus"></use>
         </svg>
@@ -43,7 +43,7 @@
 
 <script>
 import numberFormat from '@/helpers/numberFormat';
-import { mapActions } from 'vuex';
+import { mapMutations, mapActions } from 'vuex';
 
 export default {
   props: ['item'],
@@ -68,18 +68,10 @@ export default {
     deleteProduct(productId) {
       this.deleteProductFromCart(productId);
     },
-    addAmount(productId, amount) {
-      this.$store.dispatch(
-        'addCartProductAmount',
-        { productId, amount },
-      );
-    },
-    reduceAmount(productId, amount) {
-      this.$store.dispatch(
-        'reduceCartProductAmount',
-        { productId, amount },
-      );
-    },
+    ...mapMutations({
+      addAmount: 'addCartProductAmount',
+      reduceAmount: 'reduceCartProductAmount',
+    }),
   },
 };
 </script>

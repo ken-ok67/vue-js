@@ -28,21 +28,17 @@
     </div>
 
     <section class="cart">
-      <form class="cart__form form" action="#" method="POST" @submit.prevent="order">
+      <form class="cart__form form" action="#" method="POST" $submit.prevent="order">
         <div class="cart__field">
           <div class="cart__data">
-            <BaseFormText title='ФИО' :error="formError.name" type="text"
-                          placeholder="Введите ваше полное имя" v-model="formData.name"/>
-
-            <BaseFormText title='Адрес доставки' :error="formError.address" type="text"
-                          placeholder="Введите ваш адрес" v-model="formData.address"/>
-
-            <BaseFormText title='Телефон' :error="formError.phone" type="tel"
-                          placeholder="Введите ваш телефон" v-model="formData.phone"/>
-
-            <BaseFormText title='Email' :error="formError.email" type="email"
-                          placeholder="Введи ваш Email" v-model="formData.email"/>
-
+            <BaseFormText title="ФИО" placeholder='Введите ваше полное имя'
+                          :error="formError.name" v-model="formData.name" />
+            <BaseFormText title="Адрес доставки" placeholder='Введите ваш адрес'
+                          :error="formError.address" v-model="formData.address" />
+            <BaseFormText title="Телефон" placeholder='Введите ваш телефон'
+                          :error="formError.phone" v-model="formData.phone" />
+            <BaseFormText title="Email" placeholder='Введи ваш Email'
+                          :error="formError.email" v-model="formData.email" />
             <BaseFormTextarea title="Комментарий к заказу" placeholder="Ваши пожелания"
                               :error="formError.comment" v-model="formData.comment" />
           </div>
@@ -52,8 +48,8 @@
             <ul class="cart__options options">
               <li class="options__item">
                 <label class="options__label">
-                  <input class="options__radio sr-only"
-                         type="radio" name="delivery" value="0" v-model="delivery">
+                  <input class="options__radio sr-only" type="radio"
+                         name="delivery" value="0" checked="">
                   <span class="options__value">
                     Самовывоз <b>бесплатно</b>
                   </span>
@@ -61,8 +57,7 @@
               </li>
               <li class="options__item">
                 <label class="options__label">
-                  <input class="options__radio sr-only" value="500" type="radio" v-model="delivery"
-                         name="delivery">
+                  <input class="options__radio sr-only" type="radio" name="delivery" value="500">
                   <span class="options__value">
                     Курьером <b>500 ₽</b>
                   </span>
@@ -74,8 +69,7 @@
             <ul class="cart__options options">
               <li class="options__item">
                 <label class="options__label">
-                  <input class="options__radio sr-only" type="radio" name="pay"
-                         value="Картой при получении" v-model="pay">
+                  <input class="options__radio sr-only" type="radio" name="pay" value="card">
                   <span class="options__value">
                     Картой при получении
                   </span>
@@ -83,8 +77,7 @@
               </li>
               <li class="options__item">
                 <label class="options__label">
-                  <input class="options__radio sr-only" type="radio" name="pay"
-                         value="Наличными при получении" v-model="pay">
+                  <input class="options__radio sr-only" type="radio" name="pay" value="cash">
                   <span class="options__value">
                     Наличными при получении
                   </span>
@@ -96,28 +89,36 @@
 
         <div class="cart__block">
           <ul class="cart__orders">
-            <li class="cart__order" v-for="item in products" :key="item.productId">
-              <h3>{{ item.product.title }}</h3>
-              <b>{{ item.amount * item.product.price | numberFormat }} ₽</b>
-              <span>Артикул: {{ item.productId }}</span>
+            <li class="cart__order">
+              <h3>Смартфон Xiaomi Redmi Note 7 Pro 6/128GB</h3>
+              <b>18 990 ₽</b>
+              <span>Артикул: 150030</span>
+            </li>
+            <li class="cart__order">
+              <h3>Гироскутер Razor Hovertrax 2.0ii</h3>
+              <b>4 990 ₽</b>
+              <span>Артикул: 150030</span>
+            </li>
+            <li class="cart__order">
+              <h3>Электрический дрифт-карт Razor Lil’ Crazy</h3>
+              <b>8 990 ₽</b>
+              <span>Артикул: 150030</span>
             </li>
           </ul>
 
           <div class="cart__total">
-            <p>Доставка: <b>{{ delivery }} ₽</b></p>
-            <p>Итого: <b>{{ amount }}
-            </b> товара на сумму <b>{{ parseInt(delivery, 10) + totalPrice | numberFormat }} ₽</b>
-            </p>
+            <p>Доставка: <b>500 ₽</b></p>
+            <p>Итого: <b>3</b> товара на сумму <b>37 970 ₽</b></p>
           </div>
 
           <button class="cart__button button button--primery" type="submit">
             Оформить заказ
           </button>
         </div>
-        <div class="cart__error form__error-block" v-if="formErrorMessage">
+        <div class="cart__error form__error-block">
           <h4>Заявка не отправлена!</h4>
           <p>
-            {{ formErrorMessage }}
+            Похоже произошла ошибка. Попробуйте отправить снова или перезагрузите страницу.
           </p>
         </div>
       </form>
@@ -130,8 +131,6 @@ import BaseFormText from '@/components/BaseFormText.vue';
 import BaseFormTextarea from '@/components/BaseFormTextarea.vue';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config';
-import numberFormat from '@/helpers/numberFormat';
-import { mapGetters } from 'vuex';
 
 export default {
   name: 'OrderPage',
@@ -140,40 +139,17 @@ export default {
     return {
       formData: {},
       formError: {},
-      formErrorMessage: '',
-      delivery: '0',
-      pay: '',
     };
-  },
-  filters: { numberFormat },
-  computed: {
-    ...mapGetters({ products: 'cartDetailProducts', totalPrice: 'cartTotalPrice' }),
-    amount() {
-      return this.products.reduce((value, item) => value + item.amount, 0);
-    },
   },
   methods: {
     order() {
-      this.formError = {};
-      this.formErrorMessage = '';
       axios.post(`${API_BASE_URL}/api/orders`, {
         ...this.formData,
       }, {
         params: {
           userAccessKey: this.$store.state.userAccessKey,
         },
-      })
-        .then((response) => {
-          this.$store.commit('resetCart');
-          this.$store.commit('updateOrderInfo', response.data);
-          this.$store.commit('updateDelivery', this.delivery);
-          this.$store.commit('updatePay', this.pay);
-          this.$router.push({ name: 'orderInfo', params: { id: response.data.id } });
-        })
-        .catch((error) => {
-          this.formError = error.response.data.error.request || {};
-          this.formErrorMessage = error.response.data.error.message;
-        });
+      });
     },
   },
 };
